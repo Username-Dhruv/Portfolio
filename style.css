@@ -1942,7 +1942,7 @@
     .avatar-wrap { flex-shrink: 0; }
     .exp-counters { flex: 1; min-width: 240px; }
     .contact-grid { grid-template-columns: 1fr; }
-    .testi-card { min-width: 100%; }
+    .testi-card { min-width: calc(50% - 12px); }
     .footer-content { grid-template-columns: 1fr 1fr; }
     .footer-brand { grid-column: 1 / -1; }
   }
