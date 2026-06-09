@@ -1466,10 +1466,12 @@
     transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
   }
   .testi-card {
-    min-width: calc(33.333% - 16px);
+    flex: 0 0 calc((100% - 48px) / 3);
+    width: calc((100% - 48px) / 3);
+    min-width: 0;
+    box-sizing: border-box;
     border-radius: 20px;
     padding: 32px;
-    flex-shrink: 0;
     transition: all 0.4s var(--ease-smooth);
     position: relative;
     overflow: hidden;

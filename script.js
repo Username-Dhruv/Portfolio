@@ -821,194 +821,58 @@
    /* ═══════════════════════════════════════════════════════════
       19. TESTIMONIAL SLIDER
       ═══════════════════════════════════════════════════════════ */
-   (function initTestimonials() {
-     const track   = $('#testimonialsTrack');
-     const prevBtn = $('#testPrev');
-     const nextBtn = $('#testNext');
-     const dots    = $$('.test-dot');
-     if (!track || !prevBtn || !nextBtn) return;
-   
-     const cards       = $$('.testi-card', track);
-     const total       = cards.length;
-     let current       = 0;
-     let autoTimer     = null;
-     let cardsVisible  = getCardsVisible();
-   
-     function getCardsVisible() {
-       if (window.innerWidth < 640)  return 1;
-       if (window.innerWidth < 900)  return 2;
-       return 3;
-     }
-   
-     function getMaxIndex() {
-       return Math.max(0, total - cardsVisible);
-     }
-   
-     function goTo(idx) {
-       current = clamp(idx, 0, getMaxIndex());
-       const cardWidth = cards[0].getBoundingClientRect().width + 24; // gap
-       gsap.to(track, {
-         x: -current * cardWidth,
-         duration: 0.6,
-         ease: 'power3.inOut'
-       });
-       dots.forEach((d, i) => d.classList.toggle('active', i === current));
-     }
-   
-     prevBtn.addEventListener('click', () => { resetAuto(); goTo(current - 1); });
-     nextBtn.addEventListener('click', () => { resetAuto(); goTo(current + 1); });
-     dots.forEach((d, i) => d.addEventListener('click', () => { resetAuto(); goTo(i); }));
-   
-     // Auto-advance
-     function startAuto() {
-       autoTimer = setInterval(() => {
-         const next = current >= getMaxIndex() ? 0 : current + 1;
-         goTo(next);
-       }, 4500);
-     }
-     function resetAuto() { clearInterval(autoTimer); startAuto(); }
-     startAuto();
-   
-     // Touch swipe
-     let touchStartX = 0;
-     track.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; }, { passive: true });
-     track.addEventListener('touchend',   e => {
-       const diff = touchStartX - e.changedTouches[0].clientX;
-       if (Math.abs(diff) > 40) { resetAuto(); goTo(diff > 0 ? current + 1 : current - 1); }
-     });
-   
-     // Recalculate on resize
-     window.addEventListener('resize', () => {
-       cardsVisible = getCardsVisible();
-       current = clamp(current, 0, getMaxIndex());
-       goTo(current);
-     });
-   
-     // GSAP parallax on scroll
-     gsap.to(track, {
-       y: '-4%',
-       ease: 'none',
-       scrollTrigger: {
-         trigger: '.testimonials',
-         start: 'top bottom',
-         end: 'bottom top',
-         scrub: 1.5,
-       }
-     });
-   })();
-   
-   /* ═══════════════════════════════════════════════════════════
-      20. CONTACT FORM
-      ═══════════════════════════════════════════════════════════ */
-   (function initContactForm() {
-     const form    = $('#contactForm');
-     const success = $('#formSuccess');
-     if (!form) return;
-   
-     // Floating label / input focus effects
-     $$('input, textarea', form).forEach(input => {
-       input.addEventListener('focus', () => {
-         const wrap = input.closest('.input-wrap');
-         if (wrap) {
-           gsap.to(wrap.querySelector('.input-icon'), {
-             color: '#22d3ee', scale: 1.15, duration: 0.25, ease: 'back.out(2)'
-           });
-         }
-       });
-       input.addEventListener('blur', () => {
-         const wrap = input.closest('.input-wrap');
-         if (wrap && !input.value) {
-           gsap.to(wrap.querySelector('.input-icon'), {
-             color: 'rgba(255,255,255,0.25)', scale: 1, duration: 0.25
-           });
-         }
-       });
-     });
-   
-     form.addEventListener('submit', e => {
-       e.preventDefault();
-   
-       const btn = form.querySelector('.form-submit');
-       const originalHTML = btn.innerHTML;
-   
-       // Validate
-       const name  = $('#fname',    form).value.trim();
-       const email = $('#femail',   form).value.trim();
-       const msg   = $('#fmessage', form).value.trim();
-       if (!name || !email || !msg) {
-         // Shake invalid fields
-         [name ? null : $('#fname', form), email ? null : $('#femail', form), msg ? null : $('#fmessage', form)]
-           .filter(Boolean)
-           .forEach(field => {
-             gsap.to(field, {
-               x: [-6, 6, -5, 5, -3, 3, 0],
-               duration: 0.4,
-               ease: 'none',
-             });
-             field.style.borderColor = '#f43f5e';
-             field.addEventListener('input', () => { field.style.borderColor = ''; }, { once: true });
-           });
-         return;
-       }
-   
-       // Loading state
-       btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Sending...';
-       btn.disabled  = true;
-   
-       // Simulate send (replace with real API call)
-       setTimeout(() => {
-         btn.innerHTML = originalHTML;
-         btn.disabled  = false;
-         form.reset();
-         if (success) {
-           success.classList.add('show');
-           gsap.from(success, { opacity: 0, y: 10, duration: 0.4 });
-           setTimeout(() => {
-             gsap.to(success, { opacity: 0, duration: 0.4, onComplete: () => success.classList.remove('show') });
-           }, 4000);
-         }
-       }, 1600);
-     });
-   })();
-   
-   /* ═══════════════════════════════════════════════════════════
-      21. SECTION PARALLAX DEPTH (section bg elements)
-      ═══════════════════════════════════════════════════════════ */
-   (function initSectionParallax() {
-   
-     // About floating rings parallax
-     ['.ring-1', '.ring-2', '.ring-3'].forEach((sel, i) => {
-       const el = $(sel);
-       if (!el) return;
-       const speed = (i + 1) * 0.08;
-       gsap.to(el, {
-         y: `${(i % 2 === 0 ? '-' : '')}${12 + i * 5}%`,
-         ease: 'none',
-         scrollTrigger: { trigger: '.about', start: 'top bottom', end: 'bottom top', scrub: speed * 10 }
-       });
-     });
-   
-     // Skills nebula parallax
-     gsap.to('.skills-nebula', {
-       y: '-15%',
-       ease: 'none',
-       scrollTrigger: { trigger: '.skills', start: 'top bottom', end: 'bottom top', scrub: 2 }
-     });
-   
-     // Projects bg fx
-     gsap.to('.projects-bg-fx', {
-       y: '-10%',
-       ease: 'none',
-       scrollTrigger: { trigger: '.projects', start: 'top bottom', end: 'bottom top', scrub: 1.5 }
-     });
-   
-     // Contact orb drift
-     gsap.to('.contact-glow-orb', {
-       y: '-20%', x: '5%',
-       ease: 'none',
-       scrollTrigger: { trigger: '.contact', start: 'top bottom', end: 'bottom top', scrub: 2 }
-     });
-   })();
+    (function initTestimonials() {
+        const track   = $('#testimonialsTrack');
+        const prevBtn = $('#testPrev');
+        const nextBtn = $('#testNext');
+        const dots    = $$('.test-dot');
+        if (!track || !prevBtn || !nextBtn) return;
+
+        const cards = $$('.testi-card', track);
+        const total = cards.length;
+        let current = 0;
+        let autoTimer = null;
+
+        function getVisible() {
+        if (window.innerWidth < 640) return 1;
+        if (window.innerWidth < 900) return 2;
+        return 3;
+        }
+        function getMax() { return Math.max(0, total - getVisible()); }
+
+        function goTo(idx) {
+        current = clamp(idx, 0, getMax());
+        const wrapW = track.parentElement.offsetWidth;
+        const visible = getVisible();
+        const cardW = (wrapW - (24 * (visible - 1))) / visible + 24;
+        gsap.to(track, { x: -current * cardW, duration: 0.6, ease: 'power3.inOut' });
+        dots.forEach((d, i) => d.classList.toggle('active', i === current));
+        }
+
+        function resetAuto() { clearInterval(autoTimer); startAuto(); }
+        function startAuto() {
+        autoTimer = setInterval(() => goTo(current >= getMax() ? 0 : current + 1), 4500);
+        }
+
+        prevBtn.addEventListener('click', () => { resetAuto(); goTo(current - 1); });
+        nextBtn.addEventListener('click', () => { resetAuto(); goTo(current + 1); });
+        dots.forEach((d, i) => d.addEventListener('click', () => { resetAuto(); goTo(i); }));
+
+        let touchStart = 0;
+        track.addEventListener('touchstart', e => { touchStart = e.touches[0].clientX; }, { passive: true });
+        track.addEventListener('touchend',   e => {
+        const diff = touchStart - e.changedTouches[0].clientX;
+        if (Math.abs(diff) > 40) { resetAuto(); goTo(diff > 0 ? current + 1 : current - 1); }
+        });
+        window.addEventListener('resize', () => { current = clamp(current, 0, getMax()); goTo(current); });
+
+        gsap.to(track, {
+        y: '-4%', ease: 'none',
+        scrollTrigger: { trigger: '.testimonials', start: 'top bottom', end: 'bottom top', scrub: 1.5 }
+        });
+
+        startAuto();
+    })();
    
    /* ═══════════════════════════════════════════════════════════
       22. GSAP HORIZONTAL SCROLL HINT — skills ticker
